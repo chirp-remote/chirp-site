@@ -1,0 +1,25 @@
+version: 2
+
+updates:
+  # GitHub Actions. Every action here is pinned to a commit SHA, which is the
+  # only pin a tag cannot be moved out from under -- and which also means
+  # nothing updates unless Dependabot rewrites the SHA. Without this block,
+  # pinning quietly becomes freezing on a known-vulnerable action.
+  #
+  # The site has no other dependencies. The fonts and the icon come from Chirp
+  # at the commit chirp-assets.lock pins; following Chirp is a deliberate change
+  # to that lock, not an update a bot proposes.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:41"
+    open-pull-requests-limit: 5
+    target-branch: main
+    commit-message:
+      prefix: "ci(deps)"
+    labels: [ dependencies, github-actions ]
+    groups:
+      actions-all:
+        patterns: [ "*" ]

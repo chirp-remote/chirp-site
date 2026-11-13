@@ -1,0 +1,62 @@
+name: CodeQL
+
+# check-site.sh keeps HTML sinks out of the pages by pattern; CodeQL follows
+# data from a source, such as location.hash on the link page, to a sink, and
+# reads the workflows for injection and over-broad permissions. They overlap,
+# and neither one subsumes the other.
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Queries improve without the code changing, so re-scan weekly rather than
+    # only on push. Wednesday 04:23 UTC, off the hour.
+    - cron: '23 4 * * 3'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      # Uploading the SARIF result is what puts findings in the Security tab.
+      security-events: write
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ javascript-typescript, actions ]
+    steps:
+      # Audit mode records what the job talks to without blocking it, and an
+      # observer must not be able to fail the build it observes.
+      - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        continue-on-error: true
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+          # security-extended adds the lower-precision security queries. The
+          # link page handles a token; missing a path from it is not affordable.
+          queries: security-extended
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          category: /language:${{ matrix.language }}

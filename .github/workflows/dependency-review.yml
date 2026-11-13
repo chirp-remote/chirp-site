@@ -1,0 +1,42 @@
+name: Dependency Review
+
+# The site has no package dependencies: its scripts are its own and its
+# tests use only Bun. What a pull request can add is an action in a workflow,
+# and this reviews that before the merge: a known advisory, or a licence the
+# site cannot carry.
+on:
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    name: Review dependency changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      # Needed to post the summary comment on the pull request.
+      pull-requests: write
+    steps:
+      # Audit mode records what the job talks to without blocking it, and an
+      # observer must not be able to fail the build it observes.
+      - uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        continue-on-error: true
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: low
+          # Chirp's rule, for the same reason: Fabrintek relicenses what it
+          # owns all of, and it owns none of its dependencies. See
+          # https://github.com/barahn/chirp/blob/main/LICENSING.md.
+          deny-licenses: GPL-1.0-or-later, GPL-2.0-or-later, GPL-3.0-or-later, LGPL-2.0-or-later, LGPL-2.1-or-later, LGPL-3.0-or-later, AGPL-1.0-or-later, AGPL-3.0-or-later, MPL-2.0
+          comment-summary-in-pr: on-failure

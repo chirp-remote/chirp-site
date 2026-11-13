@@ -1,0 +1,27 @@
+# usechirp.app
+
+The website of [Chirp](https://github.com/barahn/chirp): remote help between two
+people who trust each other, with nothing to install and no account.
+
+The pages are in `site/`. `scripts/build-site.sh` assembles them into `_site/`,
+adding the fonts and the icon the app embeds, fetched from the Chirp commit
+`chirp-assets.lock` pins and checked against its SHA-256. The link page is tested
+against the link cases Chirp keeps, at the commit `test/chirp-vectors.lock` pins.
+
+```bash
+./scripts/build-site.sh && python3 -m http.server -d _site 8000
+```
+
+```bash
+./scripts/check-site.sh && (cd site && bun test) && ./scripts/test-fetch-chirp-assets.sh
+```
+
+Once usechirp.app is served from this repository, pushes to `main` are published
+to GitHub Pages and then checked against what usechirp.app serves.
+
+## Licence
+
+AGPL-3.0-only, as Chirp is. Copyright © 2026 Fabrintek Engenharia Digital Ltda.
+Contributions follow Chirp's
+[CONTRIBUTING.md](https://github.com/barahn/chirp/blob/main/CONTRIBUTING.md)
+and [LICENSING.md](https://github.com/barahn/chirp/blob/main/LICENSING.md).
