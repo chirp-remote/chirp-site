@@ -1,0 +1,17 @@
+# The fonts and the icon the site shares with the app, taken from Chirp at one
+# commit so the two cannot drift apart. scripts/fetch-chirp-assets.sh fetches
+# each file from that commit and refuses it unless its SHA-256 is the one here.
+# To follow a change in Chirp, set rev to the new commit and update the hashes
+# of the files it changed.
+#
+# sha256 path-in-chirp path-in-site
+repo barahn/chirp
+rev e216c51bb94ed9879977cff70c0b767526ab8912
+29bea9015db7cc42c7ca741b5a59ed6afe192377595b969c1caab572ff832965 cmd/chirp/internal/warm/fonts/Fredoka-SemiBold.ttf assets/fonts/Fredoka-SemiBold.ttf
+3ac5668a41457fd1ef59788d1dc02331725bed7027f2b69c8a90b09d03a58571 cmd/chirp/internal/warm/fonts/JetBrainsMono-Medium.ttf assets/fonts/JetBrainsMono-Medium.ttf
+7869e9bfdf433762c066204985e2952eb4972b330fc988fb69dbc9c263df3761 cmd/chirp/internal/warm/fonts/NunitoSans-Bold.ttf assets/fonts/NunitoSans-Bold.ttf
+d70a94d2e2c6dc494e8c3c7edaf9f1e210ae2a9dc1df10246ad363d7044da20e cmd/chirp/internal/warm/fonts/NunitoSans-Regular.ttf assets/fonts/NunitoSans-Regular.ttf
+5c9e7eee5c6b25f4b05b8d53b2e470ea4962f9ced742d044a98f7d95d1375bab cmd/chirp/internal/warm/fonts/OFL-Fredoka.txt assets/fonts/OFL-Fredoka.txt
+b2fe5e8987594e9ffd1d2ca52a2f5d73eb8335243893c5d6254b5ad69269591d cmd/chirp/internal/warm/fonts/OFL-JetBrainsMono.txt assets/fonts/OFL-JetBrainsMono.txt
+efbb0c9e864cef973982d9a17567e6be5c3d1759695574586f3f18c7ecca064b cmd/chirp/internal/warm/fonts/OFL-NunitoSans.txt assets/fonts/OFL-NunitoSans.txt
+d02da4c725ccf5566c8420034d6da1868bf46110f13ea3b9b2c99ee8783c0cfb cmd/chirp/internal/warm/bird/icon.svg favicon.svg

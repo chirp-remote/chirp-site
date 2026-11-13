@@ -2,16 +2,16 @@ name: Website
 
 # Publishes usechirp.app (product-model decision 6) to GitHub Pages from the
 # default branch, then verifies what is served. The pages are in site/;
-# scripts/build-site.sh adds the fonts and icon cmd/chirp embeds, so a change
-# to either republishes.
+# scripts/build-site.sh adds the fonts and icon Chirp's cmd/chirp embeds, at
+# the commit chirp-assets.lock pins, so a change to either republishes.
 on:
   push:
     branches: [ main ]
     paths:
       - 'site/**'
-      - 'cmd/chirp/internal/warm/fonts/**'
-      - 'cmd/chirp/internal/warm/bird/icon.svg'
+      - 'chirp-assets.lock'
       - 'scripts/build-site.sh'
+      - 'scripts/fetch-chirp-assets.sh'
       - 'scripts/check-site.sh'
       - '.github/workflows/pages.yml'
   workflow_dispatch:

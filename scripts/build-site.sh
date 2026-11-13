@@ -2,8 +2,8 @@
 #
 # Assembles Chirp's website, served at usechirp.app, into _site/ (or the
 # directory given). The pages live in site/; the fonts and the bird icon are
-# the ones cmd/chirp embeds, copied in here rather than kept twice, so the
-# site and the app cannot drift apart.
+# the ones Chirp's cmd/chirp embeds, fetched from the commit chirp-assets.lock
+# pins rather than kept twice, so the site and the app cannot drift apart.
 #
 # The pages load nothing from another origin: their Content-Security-Policy
 # allows 'self' only, which keeps any script but the site's own off the link
@@ -20,15 +20,12 @@ set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
 out="${1:-$root/_site}"
-warm="$root/cmd/chirp/internal/warm"
 
 rm -rf "$out"
 cp -R "$root/site" "$out"
 # The tests for the site's scripts sit next to them, and stay in the repo.
 find "$out" -name '*.test.js' -delete
-mkdir -p "$out/assets/fonts"
-cp "$warm"/fonts/*.ttf "$warm"/fonts/OFL-*.txt "$out/assets/fonts/"
-cp "$warm/bird/icon.svg" "$out/favicon.svg"
+"$root/scripts/fetch-chirp-assets.sh" "$out"
 
 # Social preview crawlers read <head> without running site.js, so /pt/,
 # /pt/l/, /pt/privacy/, /pt/how/, and /pt/community/
