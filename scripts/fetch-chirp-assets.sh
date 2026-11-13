@@ -5,8 +5,9 @@
 # its SHA-256 matches the lock's. A file that does not match stops the build
 # rather than reach usechirp.app.
 #
-# CHIRP_ASSETS_LOCK and CHIRP_ASSETS_BASE replace the lock and the address
-# files are fetched from, for scripts/test-fetch-chirp-assets.sh.
+# CHIRP_ASSETS_LOCK replaces the lock, as scripts/check-chirp-vectors.sh
+# does; CHIRP_ASSETS_BASE replaces the address files are fetched from, for
+# scripts/test-fetch-chirp-assets.sh.
 #
 # Usage: scripts/fetch-chirp-assets.sh <site-dir>
 #
