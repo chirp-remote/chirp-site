@@ -51,5 +51,10 @@ jobs:
       - name: Assets shared with Chirp are fetched as pinned
         run: ./scripts/test-fetch-chirp-assets.sh
 
+      # site/assets/link.test.js reads test/link-fragments.json; this checks
+      # it is Chirp's, so the page and the app are held to the same cases.
+      - name: Test cases are Chirp's
+        run: ./scripts/check-chirp-vectors.sh
+
       - name: Build
         run: ./scripts/build-site.sh _site
