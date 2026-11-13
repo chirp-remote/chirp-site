@@ -1,0 +1,14 @@
+# Sole maintainer. CODEOWNERS only requests review; it becomes a gate when the
+# ruleset for main requires review from code owners.
+
+*                       @mendsec
+
+# Anything that decides what may enter the tree, what reaches usechirp.app, or
+# under what terms.
+/.github/               @mendsec
+/.cloudflare/           @mendsec
+/scripts/               @mendsec
+/chirp-assets.lock      @mendsec
+/test/chirp-vectors.lock @mendsec
+/LICENSE                @mendsec
+/SECURITY.md            @mendsec
