@@ -1,5 +1,7 @@
 # usechirp.app
 
+[![CodeScene general](https://codescene.io/images/analyzed-by-codescene-badge.svg)](https://codescene.io/projects/87775)
+
 The website of [Chirp](https://github.com/barahn/chirp): remote help between two
 people who trust each other, with nothing to install and no account.
 
