@@ -7,7 +7,7 @@ name: Website (live)
 #
 # This runs weekly for settings nobody deployed, and manually on demand.
 # Post-deploy verification runs directly in pages.yml.
-# See docs/devsecops.md.
+# See docs/website.md.
 on:
   schedule:
     - cron: '17 6 * * 1'
