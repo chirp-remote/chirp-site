@@ -35,7 +35,7 @@ wait=0
 if [ "${1:-}" = "--wait" ]; then wait="${2:?--wait needs seconds}"; fi
 
 # Strict-Transport-Security as the zone's HSTS setting sends it: a year,
-# includeSubDomains and preload. See docs/devsecops.md.
+# includeSubDomains and preload. See docs/website.md.
 hsts="max-age=31536000; includeSubDomains; preload"
 
 # The JavaScript Detections snippet, with r, t and ray emptied.

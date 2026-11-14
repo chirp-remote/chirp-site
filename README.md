@@ -16,8 +16,10 @@ against the link cases Chirp keeps, at the commit `test/chirp-vectors.lock` pins
 ./scripts/check-site.sh && (cd site && bun test) && ./scripts/test-fetch-chirp-assets.sh
 ```
 
-Once usechirp.app is served from this repository, pushes to `main` are published
-to GitHub Pages and then checked against what usechirp.app serves.
+Pushes to `main` are published to GitHub Pages and then checked against what
+usechirp.app serves. [docs/website.md](docs/website.md) covers the hosting,
+Cloudflare in front of it, the security headers, and the settings no pull
+request can deliver.
 
 ## Licence
 
