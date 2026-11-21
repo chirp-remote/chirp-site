@@ -5,7 +5,7 @@
 # of the files it changed.
 #
 # sha256 path-in-chirp path-in-site
-repo barahn/chirp
+repo chirp-remote/chirp
 rev e216c51bb94ed9879977cff70c0b767526ab8912
 29bea9015db7cc42c7ca741b5a59ed6afe192377595b969c1caab572ff832965 cmd/chirp/internal/warm/fonts/Fredoka-SemiBold.ttf assets/fonts/Fredoka-SemiBold.ttf
 3ac5668a41457fd1ef59788d1dc02331725bed7027f2b69c8a90b09d03a58571 cmd/chirp/internal/warm/fonts/JetBrainsMono-Medium.ttf assets/fonts/JetBrainsMono-Medium.ttf
