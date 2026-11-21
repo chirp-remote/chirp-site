@@ -4,6 +4,6 @@
 # same file. Same format as chirp-assets.lock; paths in the site are in test/.
 #
 # sha256 path-in-chirp path-in-test
-repo barahn/chirp
+repo chirp-remote/chirp
 rev 38b81b2777bdc17b45d84e03a2b7575c3b31fad9
 a223c004e74ecdf428837a26d828f057cb42524f973f5bd8d687ce441b662d3d client/testdata/link-fragments.json link-fragments.json
