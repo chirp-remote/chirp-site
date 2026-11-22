@@ -322,6 +322,7 @@ footer .sel { user-select: all; color: var(--text); }
   gap: 12px;
 }
 .priv-card h2 { font: 600 var(--step-1)/1.2 var(--display); color: var(--text); }
+.priv-card div { display: grid; gap: 10px; }
 .priv-card p { font-size: var(--step-0); color: var(--muted); line-height: 1.6; }
 .priv-card p b { color: var(--text); font-weight: 700; }
 .priv-card ul { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; color: var(--muted); font-size: var(--step-0); }
