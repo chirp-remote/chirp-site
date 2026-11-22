@@ -115,14 +115,31 @@
   function pct(p) {
     return new Intl.NumberFormat(lang, { maximumFractionDigits: 3 }).format(p) + "%";
   }
+  function hasPercent(fig) {
+    return Boolean(fig) && typeof fig.percent === "number";
+  }
+  // A window counts only when something was observed in it.
+  function measured(w) {
+    return hasPercent(w) && Boolean(w.observed_minutes);
+  }
   function level(w) {
-    if (!w || !w.observed_minutes || typeof w.percent !== "number") return "none";
+    if (!measured(w)) return "none";
     if (w.percent >= 99.9) return "ok";
     if (w.percent >= 99) return "warn";
     return "bad";
   }
 
   var SEVERITY = { offline: 0, failing: 1, unknown: 2, up: 3 };
+  // A state the page does not know is shown, and sorted, as unknown.
+  function stateOf(s) {
+    return SEVERITY[s.state] === undefined ? "unknown" : s.state;
+  }
+  function byConcern(a, b) {
+    var d = SEVERITY[stateOf(a)] - SEVERITY[stateOf(b)];
+    if (d) return d;
+    if (a.id === b.id) return 0;
+    return a.id < b.id ? -1 : 1;
+  }
   function shown(s) {
     switch (filter) {
       case "dedicated": return s.kind === "node";
@@ -134,49 +151,53 @@
 
   // A card is built once, and its figures are then rewritten in place, so a
   // round of new figures never moves the focus or the scroll.
+  function append(parent) {
+    for (var i = 1; i < arguments.length; i++) parent.appendChild(arguments[i]);
+    return parent;
+  }
+  function clear(node) {
+    while (node.firstChild) node.removeChild(node.firstChild);
+  }
+  // A figure: its label, and a link to how it is made.
+  function figure(label, def) {
+    var a = el("a");
+    a.href = def;
+    return { box: append(el("div"), el("dt", "", label), append(el("dd"), a)), link: a };
+  }
+
+  // A card is built once, and its figures are then rewritten in place, so a
+  // round of new figures never moves the focus or the scroll.
   function buildCard(s) {
     var c = { li: el("li", "server") };
-    var head = el("div", "srv-head");
-    c.pill = el("span", "pill-state");
-    c.pill.appendChild(el("span", "dot"));
+    c.li.appendChild(buildHead(c, s));
+    c.meta = append(c.li, el("p", "srv-meta")).lastChild;
+    c.since = append(c.li, el("p", "srv-since")).lastChild;
+    c.li.appendChild(buildFigures(c));
+    c.li.appendChild(buildStrip(c));
+    c.li.appendChild(append(el("div", "strip-axis"), el("span", "", t().ago90), el("span", "", t().today)));
+    return c;
+  }
+  function buildHead(c, s) {
     c.pillText = el("span");
-    c.pill.appendChild(c.pillText);
-    c.pillLink = el("a");
-    c.pillLink.appendChild(c.pill);
-    head.appendChild(c.pillLink);
-    head.appendChild(el("h3", "", s.id));
+    c.pill = append(el("span", "pill-state"), el("span", "dot"), c.pillText);
+    c.pillLink = append(el("a"), c.pill);
     c.badges = el("span", "badges");
-    head.appendChild(c.badges);
-    c.li.appendChild(head);
-
-    c.meta = el("p", "srv-meta");
-    c.li.appendChild(c.meta);
-    c.since = el("p", "srv-since");
-    c.li.appendChild(c.since);
-
+    return append(el("div", "srv-head"), c.pillLink, el("h3", "", s.id), c.badges);
+  }
+  function buildFigures(c) {
     var figs = el("dl", "figures");
     c.fig = {};
     [["24h", t().w24h], ["30d", t().w30d], ["90d", t().w90d]].forEach(function (w) {
-      var d = el("div");
-      d.appendChild(el("dt", "", w[1]));
-      var dd = el("dd");
-      var a = el("a");
-      a.href = "#def-uptime";
-      dd.appendChild(a);
-      d.appendChild(dd);
-      figs.appendChild(d);
-      c.fig[w[0]] = a;
+      var f = figure(w[1], "#def-uptime");
+      figs.appendChild(f.box);
+      c.fig[w[0]] = f.link;
     });
-    var ld = el("div");
-    ld.appendChild(el("dt", "", t().latency));
-    var ldd = el("dd");
-    c.lat = el("a");
-    c.lat.href = "#def-latency";
-    ldd.appendChild(c.lat);
-    ld.appendChild(ldd);
-    figs.appendChild(ld);
-    c.li.appendChild(figs);
-
+    var lat = figure(t().latency, "#def-latency");
+    figs.appendChild(lat.box);
+    c.lat = lat.link;
+    return figs;
+  }
+  function buildStrip(c) {
     c.strip = el("div", "strip");
     c.strip.setAttribute("role", "img");
     c.bars = [];
@@ -186,12 +207,7 @@
       c.strip.appendChild(b);
       c.bars.push(b);
     }
-    c.li.appendChild(c.strip);
-    var axis = el("div", "strip-axis");
-    axis.appendChild(el("span", "", t().ago90));
-    axis.appendChild(el("span", "", t().today));
-    c.li.appendChild(axis);
-    return c;
+    return c.strip;
   }
 
   function badge(text, def, cls) {
@@ -202,113 +218,128 @@
 
   function updateCard(c, s) {
     var L = t();
-    var state = SEVERITY[s.state] === undefined ? "unknown" : s.state;
+    showState(c, stateOf(s), L);
+    showBadges(c, s, L);
+    c.meta.textContent = metaLine(s, L);
+    showUptime(c, s, L);
+    c.lat.textContent = typeof s.latency_ms === "number" ? s.latency_ms + " ms" : "—";
+    showStrip(c, history[s.id], L);
+    c.s = s;
+    tickCard(c);
+  }
+  function showState(c, state, L) {
     c.li.setAttribute("data-state", state);
     c.pill.setAttribute("data-state", state);
     c.pillText.textContent = L.state[state];
     c.pillLink.href = state === "up" ? "#def-probe" : "#def-" + state;
-
-    while (c.badges.firstChild) c.badges.removeChild(c.badges.firstChild);
+  }
+  function showBadges(c, s, L) {
+    clear(c.badges);
     if (s.kind === "node") c.badges.appendChild(badge(L.dedicated, "#def-dedicated"));
     if (s["new"]) c.badges.appendChild(badge(L["new"], "#def-new", "new"));
     if (s.listing === "suspended") c.badges.appendChild(badge(L.suspended, "#def-suspended", "suspended"));
-
-    var host = "";
-    try { host = new URL(s.url).host; } catch (e) { host = String(s.url || ""); }
-    c.meta.textContent = [s.operator, s.region, host, s.behind_cdn ? L.cdn : ""].filter(Boolean).join(" · ");
-
+  }
+  function hostOf(url) {
+    try { return new URL(url).host; } catch (e) { return String(url || ""); }
+  }
+  function metaLine(s, L) {
+    return [s.operator, s.region, hostOf(s.url), s.behind_cdn ? L.cdn : ""].filter(Boolean).join(" · ");
+  }
+  // What one uptime window shows, and the definition it links to. A new
+  // server's 90 days are a short history, not a figure.
+  function uptimeText(w, fig, s, L) {
+    if (w === "90d" && s["new"]) return [L.shortHistory, "#def-new"];
+    if (hasPercent(fig)) return [pct(fig.percent), "#def-uptime"];
+    return [L.noData, "#def-nodata"];
+  }
+  function showUptime(c, s, L) {
     var up = s.uptime || {};
     ["24h", "30d", "90d"].forEach(function (w) {
-      var fig = up[w];
-      var a = c.fig[w];
-      if (w === "90d" && s["new"]) {
-        a.textContent = L.shortHistory;
-        a.href = "#def-new";
-      } else if (fig && typeof fig.percent === "number") {
-        a.textContent = pct(fig.percent);
-        a.href = "#def-uptime";
-      } else {
-        a.textContent = L.noData;
-        a.href = "#def-nodata";
-      }
+      var fig = up[w], a = c.fig[w], view = uptimeText(w, fig, s, L);
+      a.textContent = view[0];
+      a.href = view[1];
       a.title = fig ? fig.up_minutes + " / " + fig.observed_minutes + " min" : "";
     });
-    c.lat.textContent = typeof s.latency_ms === "number" ? s.latency_ms + " ms" : "—";
-
-    var days = history[s.id];
+  }
+  function dayTitle(d, lv, L) {
+    if (!d) return "";
+    return L.dayTitle(d.day, lv === "none" ? L.noData : pct(d.percent));
+  }
+  // The last DAYS days, oldest first, one bar each; a day missing from the
+  // history is a blank bar.
+  function showStrip(c, days, L) {
     var withData = 0, low = null;
     for (var i = 0; i < DAYS; i++) {
       var d = days && days[days.length - DAYS + i];
       var lv = level(d);
       c.bars[i].setAttribute("data-level", lv);
-      c.bars[i].title = d ? L.dayTitle(d.day, lv === "none" ? L.noData : pct(d.percent)) : "";
-      if (lv !== "none") {
-        withData++;
-        if (low === null || d.percent < low) low = d.percent;
-      }
+      c.bars[i].title = dayTitle(d, lv, L);
+      if (lv === "none") continue;
+      withData++;
+      low = low === null ? d.percent : Math.min(low, d.percent);
     }
     c.strip.setAttribute("aria-label", L.strip(withData, low === null ? "" : pct(low)));
-    c.s = s;
-    tickCard(c);
   }
 
   // The one line that ages between rounds: since when a server is down.
   function tickCard(c) {
-    var s = c.s, L = t(), now = serverNow(), parts = [];
-    switch (s.state) {
-      case "up":
-        c.since.hidden = true;
-        return;
-      case "offline":
-      case "failing":
-        if (s.last_ok) {
-          parts.push((s.state === "offline" ? L.offlineFor : L.failingFor)(dur(now - Date.parse(s.last_ok))));
-          parts.push(L.lastAnswered(when(s.last_ok)));
-        } else {
-          parts.push(L.state[s.state]);
-          parts.push(L.neverAnswered);
-        }
-        if (s.last_error && L.err[s.last_error]) parts.push(L.err[s.last_error]);
-        break;
-      default:
-        parts.push(s.last_checked ? L.unknownFor(dur(now - Date.parse(s.last_checked))) : L.notYet);
-        if (s.last_ok) parts.push(L.lastAnswered(when(s.last_ok)));
-    }
-    c.since.hidden = false;
+    var s = c.s;
+    c.since.hidden = s.state === "up";
+    if (c.since.hidden) return;
+    var down = s.state === "offline" || s.state === "failing";
+    var parts = down ? downParts(s, t(), serverNow()) : unknownParts(s, t(), serverNow());
     c.since.textContent = parts.join(" · ");
+  }
+  function downParts(s, L, now) {
+    var parts;
+    if (s.last_ok) {
+      var forDur = s.state === "offline" ? L.offlineFor : L.failingFor;
+      parts = [forDur(dur(now - Date.parse(s.last_ok))), L.lastAnswered(when(s.last_ok))];
+    } else {
+      parts = [L.state[s.state], L.neverAnswered];
+    }
+    if (L.err[s.last_error]) parts.push(L.err[s.last_error]);
+    return parts;
+  }
+  function unknownParts(s, L, now) {
+    var parts = [s.last_checked ? L.unknownFor(dur(now - Date.parse(s.last_checked))) : L.notYet];
+    if (s.last_ok) parts.push(L.lastAnswered(when(s.last_ok)));
+    return parts;
   }
 
   function render() {
-    var L = t();
-    var headline = document.getElementById("st-headline");
-    var note = document.getElementById("st-monitor");
-    var list = document.getElementById("st-servers");
     var servers = snap && Array.isArray(snap.servers) ? snap.servers : [];
-
     document.getElementById("st-toolbar").hidden = servers.length === 0;
     document.getElementById("st-empty").hidden = !snap || servers.length > 0;
-
-    if (!snap) {
-      headline.textContent = failing ? L.down : L.loading;
-      note.hidden = !failing;
-      note.textContent = L.downNote;
-      tick();
-      return;
-    }
+    if (snap) renderServers(servers);
+    else renderWaiting();
+    tick();
+  }
+  // No figures yet: either the first answer is on its way, or none came.
+  function renderWaiting() {
+    var L = t(), note = document.getElementById("st-monitor");
+    document.getElementById("st-headline").textContent = failing ? L.down : L.loading;
+    note.hidden = !failing;
+    note.textContent = L.downNote;
+  }
+  function renderServers(servers) {
+    var L = t();
     var up = servers.filter(function (s) { return s.state === "up"; }).length;
-    headline.textContent = servers.length ? L.upOf(up, servers.length) : L.none;
-
+    document.getElementById("st-headline").textContent = servers.length ? L.upOf(up, servers.length) : L.none;
+    var visible = placeCards(document.getElementById("st-servers"), servers.slice().sort(byConcern));
+    var nomatch = document.getElementById("st-nomatch");
+    nomatch.hidden = servers.length === 0 || visible > 0;
+    nomatch.textContent = L.noMatch;
+  }
+  // Puts a card for each server in list, in order, and drops the cards of
+  // servers that are gone. Returns how many the filter shows.
+  function placeCards(list, order) {
     if (cardsLang !== lang) {
-      while (list.firstChild) list.removeChild(list.firstChild);
+      clear(list);
       cards = {};
       cardsLang = lang;
     }
-    var order = servers.slice().sort(function (a, b) {
-      var d = (SEVERITY[a.state] === undefined ? 2 : SEVERITY[a.state]) - (SEVERITY[b.state] === undefined ? 2 : SEVERITY[b.state]);
-      return d || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
-    });
-    var seen = {};
-    var visible = 0;
+    var seen = {}, visible = 0;
     order.forEach(function (s, i) {
       seen[s.id] = true;
       var c = cards[s.id] || (cards[s.id] = buildCard(s));
@@ -319,37 +350,34 @@
       if (list.children[i] !== c.li) list.insertBefore(c.li, list.children[i] || null);
     });
     Object.keys(cards).forEach(function (id) {
-      if (!seen[id]) {
-        list.removeChild(cards[id].li);
-        delete cards[id];
-      }
+      if (seen[id]) return;
+      list.removeChild(cards[id].li);
+      delete cards[id];
     });
-    var nomatch = document.getElementById("st-nomatch");
-    nomatch.hidden = servers.length === 0 || visible > 0;
-    nomatch.textContent = L.noMatch;
-    tick();
+    return visible;
   }
 
   // Every second: the ages on the page.
   function tick() {
-    var L = t(), note = document.getElementById("st-monitor"), checked = document.getElementById("st-checked");
+    var checked = document.getElementById("st-checked");
     if (!snap) {
       checked.textContent = "";
       return;
     }
-    var age = serverNow() - Date.parse(snap.generated_at);
-    var interval = (snap.interval_seconds || 30) * 1000;
+    var L = t(), age = serverNow() - Date.parse(snap.generated_at);
     checked.textContent = L.checked(dur(age), snap.vantage || "?");
-    if (failing) {
-      note.hidden = false;
-      note.textContent = L.lost(dur(age));
-    } else if (age > 3 * interval) {
-      note.hidden = false;
-      note.textContent = L.stale(dur(age));
-    } else {
-      note.hidden = true;
-    }
+    var warning = monitorWarning(age, L), note = document.getElementById("st-monitor");
+    note.hidden = !warning;
+    if (warning) note.textContent = warning;
     Object.keys(cards).forEach(function (id) { tickCard(cards[id]); });
+  }
+  // What to say about the monitor itself, if anything: it stopped
+  // answering, or it answers with figures too old to be current.
+  function monitorWarning(age, L) {
+    if (failing) return L.lost(dur(age));
+    var interval = (snap.interval_seconds || 30) * 1000;
+    if (age > 3 * interval) return L.stale(dur(age));
+    return "";
   }
 
   function get(path) {
@@ -370,11 +398,16 @@
     }));
   }
 
+  function isSnapshot(data) {
+    if (!data || !Array.isArray(data.servers)) return false;
+    return typeof data.generated_at === "string";
+  }
+
   var timer;
   function poll() {
     clearTimeout(timer);
     get("/v1/servers").then(function (data) {
-      if (!data || !Array.isArray(data.servers) || typeof data.generated_at !== "string") throw new Error("unexpected answer");
+      if (!isSnapshot(data)) throw new Error("unexpected answer");
       snap = data;
       failing = false;
       var unseen = data.servers.some(function (s) { return !history[s.id]; });

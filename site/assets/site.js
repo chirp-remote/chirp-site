@@ -271,42 +271,61 @@
   function text(t) {
     return document.createTextNode(t.replace(/&(lt|gt|amp);/g, function (e, n) { return ENTITIES[n]; }));
   }
+  // Builds src into a fragment, or returns null if any of it is outside the
+  // allowlist. open is the stack of elements still open, the fragment first.
   function build(src) {
-    var root = document.createDocumentFragment(), open = [root], m, a;
+    var root = document.createDocumentFragment(), open = [root], m;
     var token = /<(\/?)([a-z0-9]+)((?:\s+[a-z-]+="[^"<>]*")*)\s*>|[^<]+|</g;
     while ((m = token.exec(src))) {
-      var top = open[open.length - 1];
-      if (m[2] === undefined) {
-        if (m[0] === "<") return null;
-        top.appendChild(text(m[0]));
-        continue;
-      }
-      if (!TAGS[m[2]]) return null;
-      if (m[1]) {
-        if (top === root || top.nodeName.toLowerCase() !== m[2]) return null;
-        open.pop();
-        continue;
-      }
-      var el = document.createElement(m[2]);
-      var attr = /([a-z-]+)="([^"]*)"/g;
-      while ((a = attr.exec(m[3]))) {
-        var allowed = TAG_ATTRS[m[2]] && TAG_ATTRS[m[2]][a[1]];
-        if (!allowed || !allowed.test(a[2])) return null;
-        el.setAttribute(a[1], a[2]);
-      }
-      top.appendChild(el);
-      open.push(el);
+      if (!add(m, open)) return null;
     }
     return open.length === 1 ? root : null;
   }
+  // Adds one token: text, a closing tag, or an opening tag. False when it
+  // is not allowed, or closes a tag that is not the one open.
+  function add(m, open) {
+    var top = open[open.length - 1];
+    if (m[2] === undefined) return addText(m[0], top);
+    if (!TAGS[m[2]]) return false;
+    if (m[1]) return closeTag(m[2], open);
+    var el = element(m[2], m[3]);
+    if (!el) return false;
+    top.appendChild(el);
+    open.push(el);
+    return true;
+  }
+  // A lone "<" is markup that did not parse.
+  function addText(s, top) {
+    if (s === "<") return false;
+    top.appendChild(text(s));
+    return true;
+  }
+  function closeTag(name, open) {
+    if (open.length === 1) return false;
+    if (open[open.length - 1].nodeName.toLowerCase() !== name) return false;
+    open.pop();
+    return true;
+  }
+  // The element, with its attributes, or null if one is not allowed.
+  function element(name, attrs) {
+    var el = document.createElement(name), attr = /([a-z-]+)="([^"]*)"/g, a;
+    while ((a = attr.exec(attrs))) {
+      if (!attrAllowed(name, a[1], a[2])) return null;
+      el.setAttribute(a[1], a[2]);
+    }
+    return el;
+  }
+  function attrAllowed(tag, name, value) {
+    var rules = TAG_ATTRS[tag];
+    if (!rules || !Object.prototype.hasOwnProperty.call(rules, name)) return false;
+    return rules[name].test(value);
+  }
   var built = {};
   function translated(k) {
-    if (!(k in built)) {
-      built[k] = PT[k] === undefined ? null : build(PT[k]);
-      if (PT[k] !== undefined && !built[k]) {
-        console.warn("chirp: translation " + k + " has markup outside the allowlist; showing English");
-      }
-    }
+    if (k in built) return built[k];
+    if (PT[k] === undefined) return (built[k] = null);
+    built[k] = build(PT[k]);
+    if (!built[k]) console.warn("chirp: translation " + k + " has markup outside the allowlist; showing English");
     return built[k];
   }
   function copyOf(el) {
@@ -316,7 +335,8 @@
   }
   // Fills el with its key's text in the current language.
   function fill(el) {
-    var nodes = (lang === "pt-BR" && translated(el.getAttribute("data-i18n"))) || el._en;
+    var pt = lang === "pt-BR" ? translated(el.getAttribute("data-i18n")) : null;
+    var nodes = pt || el._en;
     while (el.firstChild) el.removeChild(el.firstChild);
     el.appendChild(nodes.cloneNode(true));
   }
@@ -469,10 +489,19 @@
   // chirps now and then, as it does in the app; the pointer passing over it
   // three times in a row shoos it to the far side. hop.js makes the choices;
   // this moves it.
-  var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var bird = document.getElementById("hero-bird");
-  if (bird && !still && window.ChirpHop && bird.animate) walk(bird, window.ChirpHop);
-  else if (bird) bird.classList.remove("is-arriving");
+  if (bird) {
+    if (canWalk(bird)) walk(bird, window.ChirpHop);
+    else bird.classList.remove("is-arriving");
+  }
+
+  // The bird stays put for visitors who asked for less motion, and in a
+  // browser without the Web Animations API or hop.js.
+  function canWalk(bird) {
+    var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (still) return false;
+    return Boolean(window.ChirpHop) && Boolean(bird.animate);
+  }
 
   function walk(bird, hop) {
     var art = bird.querySelector("svg");
@@ -523,8 +552,9 @@
       setTimeout(function () { bird.classList.remove("is-chirping"); }, 700);
     }
     function rest(ms) { clearTimeout(resting); resting = setTimeout(step, ms); }
+    function seen() { return inView && !document.hidden; }
     function step() {
-      if (document.hidden || !inView) { paused = true; return; }
+      if (!seen()) { paused = true; return; }
       var to = hop.nextHop(at, bounds(), Math.random);
       var paired = Boolean(to.pair);
       move(to, paired ? 6 : 10, paired ? 200 : 320, function () {
@@ -533,7 +563,7 @@
       });
     }
     function resume() {
-      if (paused && !document.hidden && inView) { paused = false; step(); }
+      if (paused && seen()) { paused = false; step(); }
     }
 
     bird.addEventListener("pointerenter", function (e) {
