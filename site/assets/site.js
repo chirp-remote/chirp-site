@@ -110,7 +110,6 @@
     by: "Por Fabrintek · AGPL-3.0",
     source: "Código-fonte",
     howChirpWorks: "Como o Chirp funciona",
-    discussions: "Comunidade",
     security: "Vulnerabilidades:",
     networkStatus: "Status da rede",
     stKicker: "Rede pública",
@@ -189,27 +188,6 @@
     how4Text: "<p>A caixa de diálogo de consentimento oferece interruptores independentes para visualização da tela, controle remoto de mouse e teclado, sincronização de área de transferência e transferência de arquivos:</p><ul><li><b>Interruptores independentes:</b> apenas <i>Ver sua tela</i> inicia ativado; mouse/teclado e arquivos só são concedidos se ativados ativamente.</li><li><b>Proteção de privacidade:</b> senhas copiadas de gerenciadores de senhas nunca saem da máquina.</li><li><b>Roteamento efêmero em memória:</b> a rede pública processa o encontro entre dispositivos em memória volátil, sem reter históricos nem traçar perfis de usuários.</li></ul>",
     how5Title: "5. Compromissos fundamentais do projeto",
     how5Text: "<li><b>Sem recursos bloqueados:</b> tela, controle, área de transferência e arquivos fazem parte do núcleo gratuito e livre, permanentemente.</li><li><b>Zero telemetria:</b> sem SDKs de rastreamento, sem cookies, sem analytics.</li><li><b>100% código aberto:</b> sob a licença AGPL-3.0-only, com compilações reproduzíveis assinadas criptograficamente via Sigstore Cosign.</li>",
-    commKicker: "Comunidade &amp; Crescimento",
-    commTitle: "Comunidade Chirp",
-    commLede: "Um espaço colaborativo e de alto nível dedicado ao uso no mundo real, evolução arquitetural e crescimento saudável do projeto. Priorizamos privacidade, segurança e colaboração respeitosa.",
-    commPrinTitle: "1. Princípios de Participação",
-    commPrinText: "<p>O Chirp é fundamentado na confiança humana e no respeito mútuo. Para garantir discussões construtivas e voltadas ao crescimento do projeto:</p><ul><li><b>Alto Sinal e Feedback Construtivo:</b> acolhemos ideias ponderadas, reprodução precisa de bugs, melhorias de acessibilidade e otimizações de desempenho.</li><li><b>Respeito Mútuo e Colaboração:</b> esperamos que todas as pessoas mantenham uma convivência respeitosa e civil. Comportamentos desrespeitosos ou provocações são moderados imediatamente.</li><li><b>Divulgação Responsável de Segurança:</b> vulnerabilidades potenciais <b>nunca</b> devem ser publicadas em discussões abertas. Relate-as diretamente para security@fabrintek.com.br sob nosso processo de divulgação coordenada.</li></ul>",
-    commChanTitle: "2. Canais de Discussão e Contribuição",
-    commChanDesc: "Participe das conversas nas categorias estruturadas do GitHub Discussions:",
-    commChanIdeasTitle: "Ideias e Sugestões de Recursos",
-    commChanIdeasDesc: "Proponha melhorias, ideias de protocolo, aprimoramentos de interface e suporte a novas plataformas.",
-    commChanIdeasBtn: "Propor uma Ideia &rarr;",
-    commChanShowTitle: "Casos de Uso e Demonstrações",
-    commChanShowDesc: "Compartilhe como você usa o Chirp no suporte a familiares, TI remota, acessibilidade ou relays próprios.",
-    commChanShowBtn: "Compartilhar História &rarr;",
-    commChanQATitle: "Perguntas e Respostas Técnicas",
-    commChanQADesc: "Tire dúvidas com mantenedores e outros usuários sobre travessia de NAT, firewalls e compilação.",
-    commChanQABtn: "Fazer uma Pergunta &rarr;",
-    commChanEngTitle: "Engenharia e Arquitetura",
-    commChanEngDesc: "Discussões técnicas aprofundadas sobre relays em memória, sinalização WebRTC, UI em Fyne e segurança.",
-    commChanEngBtn: "Entrar na Discussão &rarr;",
-    commModTitle: "3. Curadoria e Moderação Ativa",
-    commModText: "<p>Para preservar a qualidade do diálogo e manter o foco no roteiro de desenvolvimento:</p><ul><li><b>Prevenção a Golpes e Spam:</b> ferramentas de assistência remota são alvos frequentes de agentes mal-intencionados. Comentários que promovam golpes, ferramentas não verificadas ou spam são removidos com rapidez e as contas restritas.</li><li><b>Priorização por Reações:</b> os mantenedores revisam regularmente e elevam ao roadmap ativo os tópicos que recebem upvotes positivos da comunidade (👍, 🚀, ❤️).</li><li><b>Zero Rastreamento Externo:</b> esta página opera sob HTML estático estrito com 0 scripts ou cookies de rastreamento de terceiros, preservando a sua privacidade.</li></ul>"
   };
 
   // Words the script itself writes.
@@ -254,10 +232,6 @@
     howpage: {
       en: ["How Chirp Works — Chirp", "One binary on both sides, instant connection codes, explicit on-screen consent, and zero telemetry: the definitive product model of Chirp."],
       "pt-BR": ["Como o Chirp Funciona — Chirp", "Um executável único nas duas pontas, códigos de conexão efêmeros, consentimento explícito na tela e zero telemetria: o modelo de produto definitivo do Chirp."]
-    },
-    community: {
-      en: ["Community — Chirp", "A constructive space dedicated to the growth, real-world usage, and architectural evolution of Chirp."],
-      "pt-BR": ["Comunidade — Chirp", "Um espaço construtivo dedicado ao crescimento, uso no mundo real e evolução arquitetural do Chirp."]
     }
   };
 
