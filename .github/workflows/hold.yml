@@ -48,7 +48,7 @@ jobs:
           if [ "$HELD" = "true" ]; then
             echo "::error::This pull request carries the 'hold: design' label." \
               "It is held until the design it depends on is approved; see" \
-              "https://github.com/barahn/chirp/blob/main/docs/branching.md. Remove the label to lift the hold -- the" \
+              "https://github.com/chirp-remote/chirp/blob/main/docs/branching.md. Remove the label to lift the hold -- the" \
               "check re-runs on its own."
             exit 1
           fi

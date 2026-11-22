@@ -2,7 +2,7 @@
 
 [![CodeScene Average Code Health](https://codescene.io/projects/87775/status-badges/average-code-health)](https://codescene.io/projects/87775)
 
-The website of [Chirp](https://github.com/barahn/chirp): remote help between two
+The website of [Chirp](https://github.com/chirp-remote/chirp): remote help between two
 people who trust each other, with nothing to install and no account.
 
 The pages are in `site/`. `scripts/build-site.sh` assembles them into `_site/`,
@@ -27,5 +27,5 @@ request can deliver.
 
 AGPL-3.0-only, as Chirp is. Copyright © 2026 Fabrintek Engenharia Digital Ltda.
 Contributions follow Chirp's
-[CONTRIBUTING.md](https://github.com/barahn/chirp/blob/main/CONTRIBUTING.md)
-and [LICENSING.md](https://github.com/barahn/chirp/blob/main/LICENSING.md).
+[CONTRIBUTING.md](https://github.com/chirp-remote/chirp/blob/main/CONTRIBUTING.md)
+and [LICENSING.md](https://github.com/chirp-remote/chirp/blob/main/LICENSING.md).

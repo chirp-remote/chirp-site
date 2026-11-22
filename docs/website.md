@@ -3,7 +3,7 @@
 How the site is hosted and what protects it: GitHub Pages behind Cloudflare,
 the settings no pull request can deliver, the headers, and how to move the
 domain. Until 2026-11-14 this lived in Chirp's
-[docs/devsecops.md](https://github.com/barahn/chirp/blob/main/docs/devsecops.md),
+[docs/devsecops.md](https://github.com/chirp-remote/chirp/blob/main/docs/devsecops.md),
 and the site in Chirp's repository.
 
 ## Settings that are not in this repository

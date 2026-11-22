@@ -1,8 +1,8 @@
 # Security
 
 This repository is usechirp.app, the website of
-[Chirp](https://github.com/barahn/chirp). Chirp's
-[security policy](https://github.com/barahn/chirp/blob/main/SECURITY.md)
+[Chirp](https://github.com/chirp-remote/chirp). Chirp's
+[security policy](https://github.com/chirp-remote/chirp/blob/main/SECURITY.md)
 covers it: what is in scope, how reports are handled, and how quickly.
 
 Report a vulnerability in the site privately, through this repository's
